@@ -1,0 +1,58 @@
+---
+title: "Job scrape tool"
+author: "Phil Steinke"
+output: html_notebook
+---
+
+## Load packages
+```{r}
+suppressPackageStartupMessages(library("plyr"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("stringr"))
+suppressPackageStartupMessages(library("rvest"))
+suppressPackageStartupMessages(library("httr"))
+suppressPackageStartupMessages(library("methods"))
+suppressPackageStartupMessages(library("qdapRegex"))
+suppressPackageStartupMessages(library("purrr"))
+suppressPackageStartupMessages(library("foreach"))
+```
+
+```{r}
+dat <- list()
+setwd("~/code/resume/scrape/data")
+urls <- list("Lead_Senior_fed.htm", "Javascript_dev_Traffio.html") # local test URL's
+```
+
+```{r}
+ParseJob <- function(header, html_class, i) {
+  tryCatch(
+    page %>%
+    html_node(html_class) %>%
+    html_text() %>%
+    str_trim() %>%                       
+    unlist(),
+    error = function(e){NA}
+  )
+}
+  
+for (i in 1:length(urls)) {
+
+  # page <- sprintf(urls, i) %>%
+    page <-
+    urls[i] %>%
+    as.character() %>%
+    read_html()
+  
+  job_site <- "Indeed"
+  job_title <- ParseJob("job_title", "b.jobtitle font", i)
+  job_location <- ParseJob("job_location", "span.location", i)
+  job_summary <- ParseJob("job_summary", "span.summary", i)
+  job_date <- ParseJob("job_date", "date", i) # days ago on Indeed
+  job_salary <- ParseJob("job_salary", "span.no-wrap", i) # days ago on Indeed
+
+  dat[[i]] <- data.frame(job_title, job_location, job_date, job_salary, job_summary, job_site)  
+}
+
+job_search_data = do.call(rbind, dat)
+write.table(job_search_data, "job_search_data.csv", sep = ",", col.names = T, append = T)
+```
