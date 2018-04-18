@@ -37,7 +37,7 @@ ParseJob <- function(header, html_class, i) {
   
 for (i in 1:length(urls)) {
 
-  # page <- sprintf(urls, i) %>%
+  # page <- sprintf(urls, i) %>%   # pagination
     page <-
     urls[i] %>%
     as.character() %>%
